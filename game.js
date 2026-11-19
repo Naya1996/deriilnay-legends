@@ -265,6 +265,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   const time = clock.getElapsedTime();
+  updateHeroMovement();
 
   heroes.forEach((hero, i) => {
     hero.position.y = Math.sin(time * 2 + i) * 0.12;
