@@ -331,7 +331,7 @@ hero.userData.attackCooldown = 0;
     if (!battleStarted) return;
 
     bots.forEach(bot => {
-      const isEnemy = bot.position.z < 0;
+      const botTeam = bot.userData.team;
 
       // Cari lawan terdekat
       let target = null;
