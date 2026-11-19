@@ -298,13 +298,35 @@ window.addEventListener("resize", () => {
 });
 
 // START BUTTON
-document.getElementById("start").onclick = () => {
-  document.getElementById("hero-info").innerHTML =
-    "<h2>ARENA 3D READY</h2><p>Dunia legenda telah terbuka!</p>";
 
-  document.getElementById("start").textContent =
-    "ARENA BERHASIL DIMUAT";
+// START GAME
+document.getElementById("start").onclick = () => {
+
+  const game = document.getElementById("game");
+
+  game.classList.add("playing");
+
+  document.getElementById("brand").style.display = "none";
+  document.getElementById("subtitle").style.display = "none";
+  document.getElementById("hero-info").style.display = "none";
+  document.getElementById("start").style.display = "none";
+  document.getElementById("status").style.display = "none";
+
+  camera.position.set(
+    heroes[0].position.x,
+    14,
+    heroes[0].position.z + 18
+  );
+
+  camera.lookAt(
+    heroes[0].position.x,
+    0,
+    heroes[0].position.z
+  );
+
+  console.log("BATTLE START!");
 };
+
 
 console.log("DERiiLNAY LEGENDS 3D READY");
 
