@@ -441,13 +441,18 @@ camera.lookAt(
       player.rotation.y = Math.atan2(joyX, joyY);
     }
 
-    camera.position.x +=
-      (player.position.x - camera.position.x) * 0.12;
+  camera.position.x +=
+  (player.position.x - camera.position.x) * 0.12;
 
-    camera.position.z +=
-      (player.position.z + 18 - camera.position.z) * 0.12;
+camera.position.z +=
+  (player.position.z + 8 - camera.position.z) * 0.12;
 
-    camera.lookAt(player.position.x, 0, player.position.z);
+camera.lookAt(
+  player.position.x,
+  1,
+  player.position.z - 3
+);  
+    
   }
 
   // ANIMATION LOOP
