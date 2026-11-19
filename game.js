@@ -306,3 +306,104 @@ document.getElementById("start").onclick = () => {
 };
 
 console.log("DERiiLNAY LEGENDS 3D READY");
+
+/* =================================
+   DERiiLNAY LEGENDS
+   VIRTUAL JOYSTICK MOVEMENT
+================================= */
+
+const joystick = document.getElementById("joystick");
+const stick = document.getElementById("stick");
+
+let joyX = 0;
+let joyY = 0;
+
+let activePointer = null;
+
+function moveJoystick(event) {
+  const rect = joystick.getBoundingClientRect();
+
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  let dx = event.clientX - centerX;
+  let dy = event.clientY - centerY;
+
+  const maxDistance = 35;
+  const distance = Math.hypot(dx, dy);
+
+  if (distance > maxDistance) {
+    dx = dx / distance * maxDistance;
+    dy = dy / distance * maxDistance;
+  }
+
+  joyX = dx / maxDistance;
+  joyY = dy / maxDistance;
+
+  stick.style.transform =
+    `translate(${dx}px, ${dy}px)`;
+}
+
+joystick.addEventListener("pointerdown", (event) => {
+  if (activePointer !== null) return;
+
+  activePointer = event.pointerId;
+  joystick.setPointerCapture(event.pointerId);
+
+  moveJoystick(event);
+});
+
+joystick.addEventListener("pointermove", (event) => {
+  if (event.pointerId !== activePointer) return;
+
+  moveJoystick(event);
+});
+
+function resetJoystick(event) {
+  if (event.pointerId !== activePointer) return;
+
+  activePointer = null;
+  joyX = 0;
+  joyY = 0;
+
+  stick.style.transform = "translate(0px, 0px)";
+}
+
+joystick.addEventListener("pointerup", resetJoystick);
+joystick.addEventListener("pointercancel", resetJoystick);
+
+/* HERO MOVEMENT */
+
+function updateHeroMovement() {
+  const hero = heroes[0];
+
+  if (!hero) return;
+
+  const speed = 0.13;
+
+  hero.position.x += joyX * speed;
+  hero.position.z += joyY * speed;
+
+  hero.position.x = THREE.MathUtils.clamp(
+    hero.position.x, -22, 22
+  );
+
+  hero.position.z = THREE.MathUtils.clamp(
+    hero.position.z, -22, 22
+  );
+
+  if (Math.abs(joyX) + Math.abs(joyY) > 0.1) {
+    hero.rotation.y = Math.atan2(joyX, joyY);
+  }
+
+  camera.position.x = hero.position.x;
+  camera.position.z = hero.position.z + 22;
+
+  camera.lookAt(
+    hero.position.x,
+    0,
+    hero.position.z
+  );
+}
+
+const oldAnimate = animate;
