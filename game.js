@@ -258,9 +258,13 @@
     hero.add(ring);
 
     hero.position.set(x, 0, z);
-    hero.userData.isPlayer = isPlayer;
-    hero.userData.baseY = 0;
-
+    
+hero.userData.isPlayer = isPlayer;
+hero.userData.baseY = 0;
+hero.userData.team = material === blueMat ? "blue" : "red";
+hero.userData.hp = 100;
+hero.userData.maxHp = 100;
+hero.userData.attackCooldown = 0;
     scene.add(hero);
     return hero;
   }
