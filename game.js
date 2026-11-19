@@ -327,100 +327,115 @@ hero.userData.attackCooldown = 0;
     bot.userData.botIndex = index;
   });
 
-  function updateBots(delta) {
-    if (!battleStarted) return;
+ 
+function updateBots(delta) {
+  if (!battleStarted) return;
 
-    bots.forEach(bot => {
-      const botTeam = bot.userData.team;
+  bots.forEach(bot => {
+    if (bot.userData.hp <= 0) return;
 
-      // Cari lawan terdekat
-      let target = null;
-      let nearestDistance = Infinity;
+    const botTeam = bot.userData.team;
+    let target = null;
+    let nearestDistance = Infinity;
 
-      heroes.forEach(other => {
-        if (other === bot) return;
+    // MENCARI MUSUH TERDEKAT
+    heroes.forEach(other => {
+      if (other === bot) return;
+      if (other.userData.team === botTeam) return;
+      if (other.userData.hp <= 0) return;
 
-        if (botTeam === other.userData.team) return;
+      const dx = other.position.x - bot.position.x;
+      const dz = other.position.z - bot.position.z;
+      const distance = Math.hypot(dx, dz);
 
-        if (other.userData.hp <= 0) return;
-
-        const distance = bot.position.distanceTo(other.position);
-
-        if (distance < nearestDistance) {
-          nearestDistance = distance;
-          target = other;
-        }
-      });
-
-      if (!target) return;
-
-      const direction = new THREE.Vector3()
-        .subVectors(target.position, bot.position);
-
-      direction.y = 0;
-
-      if (direction.length() > 0.01) {
-        direction.normalize();
-        bot.rotation.y = Math.atan2(direction.x, direction.z);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        target = other;
       }
-
-      // Bergerak mendekati musuh
-      if (nearestDistance > 3.5) {
-        bot.position.addScaledVector(direction, 2.2 * delta);
-      }
-
-
-// SERANGAN OTOMATIS BOT
-bot.userData.attackCooldown -= delta;
-
-if (nearestDistance <= 3.5 &&
-    bot.userData.attackCooldown <= 0) {
-
-  // Kurangi HP musuh
-  target.userData.hp = Math.max(
-    0,
-    target.userData.hp - 10
-  );
-
-  // Efek serangan
-  const slash = new THREE.Mesh(
-    new THREE.SphereGeometry(0.45, 12, 12),
-    new THREE.MeshBasicMaterial({
-      color: 0xffd34d,
-      transparent: true,
-      opacity: 0.9
-    })
-  );
-
-  slash.position.copy(target.position);
-  slash.position.y = 1.5;
-  scene.add(slash);
-
-  setTimeout(() => {
-    scene.remove(slash);
-    slash.geometry.dispose();
-    slash.material.dispose();
-  }, 180);
-
-  bot.userData.attackCooldown = 1.2;
-
-  console.log(
-    "SERANGAN BOT! HP MUSUH:",
-    target.userData.hp
-  );
-}
-
-
-      // Batasi pergerakan bot di arena
-      bot.position.x = THREE.MathUtils.clamp(
-        bot.position.x, -23, 23
-      );
-
-      bot.position.z = THREE.MathUtils.clamp(
-        bot.position.z, -23, 23
-      );
     });
-  }
+
+    if (!target) return;
+
+    // ARAH MUSUH
+    const dx = target.position.x - bot.position.x;
+    const dz = target.position.z - bot.position.z;
+    const direction = new THREE.Vector3(dx, 0, dz);
+
+    if (nearestDistance > 0.01) {
+      direction.normalize();
+      bot.rotation.y = Math.atan2(dx, dz);
+    }
+
+    // GERAK MENGEJAR
+    if (nearestDistance > 4.5) {
+      bot.position.addScaledVector(direction, 2.2 * delta);
+    }
+
+    // SERANGAN OTOMATIS
+    bot.userData.attackCooldown -= delta;
+
+    if (nearestDistance <= 5 &&
+        bot.userData.attackCooldown <= 0) {
+
+      target.userData.hp = Math.max(
+        0,
+        target.userData.hp - 10
+      );
+
+      // EFEK SERANGAN BESAR
+      const slash = new THREE.Mesh(
+        new THREE.TorusGeometry(1, 0.18, 8, 24),
+        new THREE.MeshBasicMaterial({
+          color: botTeam === "blue" ? 0x35baff : 0xff3333,
+          transparent: true,
+          opacity: 1
+        })
+      );
+
+      slash.position.set(
+        target.position.x,
+        1.5,
+        target.position.z
+      );
+
+      scene.add(slash);
+
+      let life = 0;
+
+      const effectTimer = setInterval(() => {
+        life += 1;
+        slash.scale.multiplyScalar(1.12);
+        slash.material.opacity -= 0.12;
+
+        if (life >= 7) {
+          clearInterval(effectTimer);
+          scene.remove(slash);
+          slash.geometry.dispose();
+          slash.material.dispose();
+        }
+      }, 35);
+
+      bot.userData.attackCooldown = 1.2;
+
+      console.log(
+        "BOT MENYERANG:",
+        botTeam,
+        "| HP MUSUH:",
+        target.userData.hp
+      );
+    }
+
+    // BATAS ARENA
+    bot.position.x = THREE.MathUtils.clamp(
+      bot.position.x, -23, 23
+    );
+
+    bot.position.z = THREE.MathUtils.clamp(
+      bot.position.z, -23, 23
+    );
+  });
+}
+ 
 
   // JOYSTICK
   function moveJoystick(event) {
