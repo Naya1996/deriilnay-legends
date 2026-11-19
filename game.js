@@ -546,9 +546,11 @@ camera.lookAt(
   function animate() {
     requestAnimationFrame(animate);
 
-    const time = clock.getElapsedTime();
+    const delta = Math.min(clock.getDelta(), 0.05);
+const time = clock.elapsedTime;
 
-    updateHeroMovement();
+updateHeroMovement();
+updateBots(delta);
 
     heroes.forEach((hero, index) => {
       if (!hero.userData.isPlayer) {
