@@ -310,6 +310,91 @@
   let activePointer = null;
   let skillCooldown = false;
 
+  // ==========================================
+  // DERiiLNAY LEGENDS - AI BOT SYSTEM
+  // ==========================================
+
+  const bots = heroes.filter(hero => !hero.userData.isPlayer);
+
+  bots.forEach((bot, index) => {
+    bot.userData.hp = 100;
+    bot.userData.maxHp = 100;
+    bot.userData.attackCooldown = Math.random() * 2;
+    bot.userData.botIndex = index;
+  });
+
+  function updateBots(delta) {
+    if (!battleStarted) return;
+
+    bots.forEach(bot => {
+      const isEnemy = bot.position.z < 0;
+
+      // Cari lawan terdekat
+      let target = null;
+      let nearestDistance = Infinity;
+
+      heroes.forEach(other => {
+        if (other === bot) return;
+
+        const otherIsEnemy = other.position.z < 0;
+
+        if (isEnemy === otherIsEnemy) return;
+
+        if (other.userData.hp <= 0) return;
+
+        const distance = bot.position.distanceTo(other.position);
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          target = other;
+        }
+      });
+
+      if (!target) return;
+
+      const direction = new THREE.Vector3()
+        .subVectors(target.position, bot.position);
+
+      direction.y = 0;
+
+      if (direction.length() > 0.01) {
+        direction.normalize();
+        bot.rotation.y = Math.atan2(direction.x, direction.z);
+      }
+
+      // Bergerak mendekati musuh
+      if (nearestDistance > 2.2) {
+        bot.position.addScaledVector(direction, 2.2 * delta);
+      }
+
+      // Menyerang musuh
+      bot.userData.attackCooldown -= delta;
+
+      if (nearestDistance <= 2.5 &&
+          bot.userData.attackCooldown <= 0) {
+
+        target.userData.hp =
+          (target.userData.hp ?? 100) - 10;
+
+        bot.userData.attackCooldown = 1.2;
+
+        console.log(
+          "BOT menyerang! HP target:",
+          target.userData.hp
+        );
+      }
+
+      // Batasi pergerakan bot di arena
+      bot.position.x = THREE.MathUtils.clamp(
+        bot.position.x, -23, 23
+      );
+
+      bot.position.z = THREE.MathUtils.clamp(
+        bot.position.z, -23, 23
+      );
+    });
+  }
+
   // JOYSTICK
   function moveJoystick(event) {
     const rect = joystick.getBoundingClientRect();
