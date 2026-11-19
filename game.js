@@ -340,9 +340,7 @@ hero.userData.attackCooldown = 0;
       heroes.forEach(other => {
         if (other === bot) return;
 
-        const otherIsEnemy = other.position.z < 0;
-
-        if (isEnemy === otherIsEnemy) return;
+        if (botTeam === other.userData.team) return;
 
         if (other.userData.hp <= 0) return;
 
