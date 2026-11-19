@@ -365,7 +365,7 @@ hero.userData.attackCooldown = 0;
       }
 
       // Bergerak mendekati musuh
-      if (nearestDistance > 2.2) {
+      if (nearestDistance > 3.5) {
         bot.position.addScaledVector(direction, 2.2 * delta);
       }
 
@@ -373,7 +373,7 @@ hero.userData.attackCooldown = 0;
 // SERANGAN OTOMATIS BOT
 bot.userData.attackCooldown -= delta;
 
-if (nearestDistance <= 3 &&
+if (nearestDistance <= 3.5 &&
     bot.userData.attackCooldown <= 0) {
 
   // Kurangi HP musuh
