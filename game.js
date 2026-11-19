@@ -301,6 +301,7 @@ window.addEventListener("resize", () => {
 
 // START GAME
 document.getElementById("start").onclick = () => {
+  alert("TOMBOL MULAI BERFUNGSI!");
 
   const game = document.getElementById("game");
 
