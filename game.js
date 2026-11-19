@@ -369,22 +369,47 @@ hero.userData.attackCooldown = 0;
         bot.position.addScaledVector(direction, 2.2 * delta);
       }
 
-      // Menyerang musuh
-      bot.userData.attackCooldown -= delta;
 
-      if (nearestDistance <= 2.5 &&
-          bot.userData.attackCooldown <= 0) {
+// SERANGAN OTOMATIS BOT
+bot.userData.attackCooldown -= delta;
 
-        target.userData.hp =
-          (target.userData.hp ?? 100) - 10;
+if (nearestDistance <= 3 &&
+    bot.userData.attackCooldown <= 0) {
 
-        bot.userData.attackCooldown = 1.2;
+  // Kurangi HP musuh
+  target.userData.hp = Math.max(
+    0,
+    target.userData.hp - 10
+  );
 
-        console.log(
-          "BOT menyerang! HP target:",
-          target.userData.hp
-        );
-      }
+  // Efek serangan
+  const slash = new THREE.Mesh(
+    new THREE.SphereGeometry(0.45, 12, 12),
+    new THREE.MeshBasicMaterial({
+      color: 0xffd34d,
+      transparent: true,
+      opacity: 0.9
+    })
+  );
+
+  slash.position.copy(target.position);
+  slash.position.y = 1.5;
+  scene.add(slash);
+
+  setTimeout(() => {
+    scene.remove(slash);
+    slash.geometry.dispose();
+    slash.material.dispose();
+  }, 180);
+
+  bot.userData.attackCooldown = 1.2;
+
+  console.log(
+    "SERANGAN BOT! HP MUSUH:",
+    target.userData.hp
+  );
+}
+
 
       // Batasi pergerakan bot di arena
       bot.position.x = THREE.MathUtils.clamp(
