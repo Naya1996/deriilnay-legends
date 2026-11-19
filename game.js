@@ -370,8 +370,17 @@
     startButton.style.display = "none";
     document.getElementById("status").style.display = "none";
 
-    camera.position.set(player.position.x, 14, player.position.z + 18);
-    camera.lookAt(player.position.x, 0, player.position.z);
+    camera.position.set(
+  player.position.x,
+  10,
+  player.position.z + 8
+);
+
+camera.lookAt(
+  player.position.x,
+  1,
+  player.position.z - 3
+);
   });
 
   // SKILL BUTTONS
